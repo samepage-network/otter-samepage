@@ -1,15 +1,19 @@
-import createApiMessageHandler from "package/backend/createApiMessageHandler";
+import createApiMessageHandler from "samepage/backend/createApiMessageHandler";
 import { notebookRequestNodeQuerySchema } from "samepage/internal/types";
-import fireNodeQuery from "samepage/utils/fireNodeQuery";
+// import fireNodeQuery from "samepage/utils/fireNodeQuery";
 import decodeState from "../src/util/decodeState";
 import encodeState from "../src/util/encodeState";
 
+const fireNodeQuery = async (query: any, context: any) => [];
+
 const message = createApiMessageHandler({
-  getDecodeState: (token) => (id, state) => {
-    return decodeState({ id, state, token });
-  },
+  getDecodeState:
+    ({ accessToken }) =>
+    (notebookPageId, state) => {
+      return decodeState({ notebookPageId, state, token: accessToken });
+    },
   getNotebookRequestHandler:
-    (token) =>
+    ({ token }) =>
     async ({ request }) => {
       if (request.schema === "node-query") {
         const result = notebookRequestNodeQuerySchema.safeParse(request);

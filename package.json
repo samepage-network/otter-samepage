@@ -27,6 +27,8 @@
   },
   "homepage": "https://github.com/samepage-network/otter-samepage#readme",
   "dependencies": {
+    "@clerk/clerk-sdk-node": "^4.8.4",
+    "crypto-js": "^4.1.1",
     "samepage": "^0.74.1"
   },
   "samepage": {
@@ -55,5 +57,9 @@
         }
       ]
     }
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.119",
+    "@types/crypto-js": "^4.1.1"
   }
 }
