@@ -218,6 +218,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     const roamjsData = user.privateMetadata.roamjsMetadata as {
       otter: { key: string };
+      rawToken: string;
     };
     const encryptionSecret =
       roamjsData?.otter?.key ||
@@ -236,10 +237,25 @@ export const handler: APIGatewayProxyHandler = async (event) => {
           })
           .then(() => key)
       ));
+    const rawToken =
+      roamjsData?.rawToken ||
+      (await Promise.resolve(nanoid()).then((key) =>
+        users
+          .updateUser(user.id, {
+            privateMetadata: {
+              ...user.privateMetadata,
+              roamjsMetadata: {
+                ...roamjsData,
+                rawToken: key,
+              },
+            },
+          })
+          .then(() => key)
+      ));
     const output = AES.encrypt(password, encryptionSecret).toString();
     return {
       statusCode: 200,
-      body: JSON.stringify({ output, token: user.privateMetadata.rawToken }),
+      body: JSON.stringify({ output, token: rawToken }),
       headers,
     };
   } else if (operation === "GET_SPEECHES") {
