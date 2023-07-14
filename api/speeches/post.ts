@@ -186,7 +186,10 @@ const getApi = async ({
       key: string;
     };
   };
-  if (user.rawToken !== token) return undefined;
+  const [authEmail, authToken] = Buffer.from(token, "base64")
+    .toString("utf8")
+    .split(":");
+  if (user.rawToken !== authToken || email !== authEmail) return undefined;
   const password = AES.decrypt(inputPassword, user.otter.key).toString(encutf8);
   return new OtterApi({ email, password });
 };
