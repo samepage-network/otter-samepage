@@ -181,12 +181,12 @@ const getApi = async ({
   const results = await users.getUserList({ emailAddress: [email] });
   if (!results.length) return undefined;
   const user = results[0].privateMetadata.roamjsMetadata as {
-    token: string;
+    rawToken: string;
     otter: {
       key: string;
     };
   };
-  if (user.token !== token) return undefined;
+  if (user.rawToken !== token) return undefined;
   const password = AES.decrypt(inputPassword, user.otter.key).toString(encutf8);
   return new OtterApi({ email, password });
 };
@@ -199,14 +199,14 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const results = await users.getUserList({ emailAddress: [email] });
     const user = !results.length
       ? await Promise.resolve([nanoid(), nanoid(), nanoid()]).then(
-          ([tempPassword, token, otterKey]) =>
+          ([tempPassword, rawToken, otterKey]) =>
             users.createUser({
               emailAddress: [email],
               password: tempPassword,
               privateMetadata: {
                 tempPassword,
                 roamjsMetadata: {
-                  token,
+                  rawToken,
                   otter: {
                     key: otterKey,
                   },
@@ -220,7 +220,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       otter: { key: string };
     };
     const encryptionSecret =
-      roamjsData?.otter.key ||
+      roamjsData?.otter?.key ||
       (await Promise.resolve(nanoid()).then((key) =>
         users
           .updateUser(user.id, {
@@ -239,7 +239,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const output = AES.encrypt(password, encryptionSecret).toString();
     return {
       statusCode: 200,
-      body: JSON.stringify({ output }),
+      body: JSON.stringify({ output, token: user.privateMetadata.rawToken }),
       headers,
     };
   } else if (operation === "GET_SPEECHES") {
