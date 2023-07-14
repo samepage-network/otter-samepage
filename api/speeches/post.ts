@@ -186,7 +186,10 @@ const getApi = async ({
       key: string;
     };
   };
-  const [authEmail, authToken] = Buffer.from(token, "base64")
+  const [authEmail, authToken] = Buffer.from(
+    token.replace(/^Bearer /, ""),
+    "base64"
+  )
     .toString("utf8")
     .split(":");
   if (user.rawToken !== authToken || email !== authEmail) return undefined;
@@ -266,7 +269,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     if (!otterApi) {
       return {
         statusCode: 401,
-        body: "Be sure to encrypt your password first in Roam Depot Settings berfo",
+        body: "Be sure to encrypt your password first in Roam Depot Settings before importing",
         headers,
       };
     }
@@ -292,7 +295,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     if (!otterApi) {
       return {
         statusCode: 401,
-        body: "Be sure to encrypt your password first in Roam Depot Settings berfo",
+        body: "Be sure to encrypt your password first in Roam Depot Settings before importing",
         headers,
       };
     }
