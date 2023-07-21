@@ -179,6 +179,7 @@ const getApi = async ({
   token: string;
 }) => {
   const results = await users.getUserList({ emailAddress: [email] });
+  console.log(`results`, results);
   if (!results.length) return undefined;
   const user = results[0].privateMetadata.roamjsMetadata as {
     rawToken: string;
@@ -192,8 +193,12 @@ const getApi = async ({
   )
     .toString("utf8")
     .split(":");
+  console.log(`authEmail`, authEmail);
+  console.log(`authToken`, authToken);
+  console.log(`user.rawToken`, user.rawToken);
   if (user.rawToken !== authToken || email !== authEmail) return undefined;
   const password = AES.decrypt(inputPassword, user.otter.key).toString(encutf8);
+  console.log(`password`, password);
   return new OtterApi({ email, password });
 };
 
