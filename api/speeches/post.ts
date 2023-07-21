@@ -265,6 +265,9 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       headers,
     };
   } else if (operation === "GET_SPEECHES") {
+    console.log(`email`, email);
+    console.log(`password`, password);
+    console.log(`token`, token);
     const otterApi = await getApi({ email, password, token });
     if (!otterApi) {
       return {
