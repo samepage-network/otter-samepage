@@ -15,6 +15,7 @@ export type OtterSpeech = {
   summary: string;
   otid: string;
   id: string;
+  process_finished: boolean;
 };
 export type OtterSpeechInfo = {
   speech_id: string;
@@ -23,6 +24,7 @@ export type OtterSpeechInfo = {
   summary: string;
   otid: string;
   id: string;
+  process_finished: boolean;
   transcripts: {
     transcript: string;
     start_offset: number;
@@ -167,6 +169,7 @@ const transform = (s: OtterSpeech) => ({
   createdDate: s.created_at,
   summary: s.summary,
   link: `https://otter.ai/u/${s.otid}`,
+  isProcessed: s.process_finished,
 });
 
 const getApi = async ({
