@@ -117,7 +117,7 @@ class OtterApi {
   }> => {
     const { data } = await axios({
       method: "GET",
-      url: `${API_BASE_URL}/speeches?page_size=10${params}`,
+      url: `${API_BASE_URL}/speeches?${params}`,
       params: {
         userid: this.user.id,
       },
@@ -271,12 +271,14 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       };
     }
     await otterApi.init();
+    const pageSize = params?.pageSize || 10;
+    const queryParams =
+      `page_size=${pageSize}` +
+      (params?.lastLoad && params?.lastModified
+        ? `&modified_after=${params.lastModified}&last_load_ts=${params.lastLoad}`
+        : "");
     const { speeches, last_load_ts, last_modified_at, end_of_list } =
-      await otterApi.getSpeeches(
-        params?.lastLoad && params?.lastModified
-          ? `&modified_after=${params.lastModified}&last_load_ts=${params.lastLoad}`
-          : ""
-      );
+      await otterApi.getSpeeches(queryParams);
     return {
       statusCode: 200,
       body: JSON.stringify({
