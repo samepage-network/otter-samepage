@@ -8,6 +8,10 @@ import { users } from "@clerk/clerk-sdk-node";
 const API_BASE_URL = "https://otter.ai/forward/api/v1";
 const CSRF_COOKIE_NAME = "csrftoken";
 
+type Folder = {
+  id: number;
+  folder_name: string;
+};
 export type OtterSpeech = {
   speech_id: string;
   title: string;
@@ -16,6 +20,7 @@ export type OtterSpeech = {
   otid: string;
   id: string;
   process_finished: boolean;
+  folder: Folder | null;
 };
 export type OtterSpeechInfo = {
   speech_id: string;
@@ -25,6 +30,7 @@ export type OtterSpeechInfo = {
   otid: string;
   id: string;
   process_finished: boolean;
+  folder: Folder | null;
   transcripts: {
     transcript: string;
     start_offset: number;
@@ -170,6 +176,12 @@ const transform = (s: OtterSpeech) => ({
   summary: s.summary,
   link: `https://otter.ai/u/${s.otid}`,
   isProcessed: s.process_finished,
+  folder: s.folder
+    ? {
+        id: s.folder.id,
+        name: s.folder.folder_name,
+      }
+    : null,
 });
 
 const getApi = async ({
