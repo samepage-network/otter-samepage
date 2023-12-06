@@ -8,6 +8,10 @@ import { users } from "@clerk/clerk-sdk-node";
 const API_BASE_URL = "https://otter.ai/forward/api/v1";
 const CSRF_COOKIE_NAME = "csrftoken";
 
+type Folder = {
+  id: number;
+  folder_name: string;
+};
 export type OtterSpeech = {
   speech_id: string;
   title: string;
@@ -15,6 +19,8 @@ export type OtterSpeech = {
   summary: string;
   otid: string;
   id: string;
+  process_finished: boolean;
+  folder: Folder | null;
 };
 export type OtterSpeechInfo = {
   speech_id: string;
@@ -23,6 +29,8 @@ export type OtterSpeechInfo = {
   summary: string;
   otid: string;
   id: string;
+  process_finished: boolean;
+  folder: Folder | null;
   transcripts: {
     transcript: string;
     start_offset: number;
@@ -117,7 +125,7 @@ class OtterApi {
   }> => {
     const { data } = await axios({
       method: "GET",
-      url: `${API_BASE_URL}/speeches?page_size=10${params}`,
+      url: `${API_BASE_URL}/speeches?${params}`,
       params: {
         userid: this.user.id,
       },
@@ -167,6 +175,13 @@ const transform = (s: OtterSpeech) => ({
   createdDate: s.created_at,
   summary: s.summary,
   link: `https://otter.ai/u/${s.otid}`,
+  isProcessed: s.process_finished,
+  folder: s.folder
+    ? {
+        id: s.folder.id,
+        name: s.folder.folder_name,
+      }
+    : null,
 });
 
 const getApi = async ({
@@ -271,12 +286,14 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       };
     }
     await otterApi.init();
+    const pageSize = params?.pageSize || 10;
+    const queryParams =
+      `page_size=${pageSize}` +
+      (params?.lastLoad && params?.lastModified
+        ? `&modified_after=${params.lastModified}&last_load_ts=${params.lastLoad}`
+        : "");
     const { speeches, last_load_ts, last_modified_at, end_of_list } =
-      await otterApi.getSpeeches(
-        params?.lastLoad && params?.lastModified
-          ? `&modified_after=${params.lastModified}&last_load_ts=${params.lastLoad}`
-          : ""
-      );
+      await otterApi.getSpeeches(queryParams);
     return {
       statusCode: 200,
       body: JSON.stringify({
